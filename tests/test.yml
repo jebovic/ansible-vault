@@ -5,10 +5,7 @@
     - role_under_test
     - supervisor
   vars:
-    vault_backends:
-      file:
-        address: '"127.0.0.1:{{ consul_http_port }}"'
-        path: '"vault"'
+    vault_backends: []
     vault_listeners:
       tcp:
         address: '"127.0.0.1:{{ vault_http_port }}"'
