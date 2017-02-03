@@ -39,8 +39,6 @@ script:
   # test role tasks
   - sleep 30
   - docker exec "$(cat ${container_id})" env VAULT_ADDR='http://127.0.0.1:8200' vault init
-  - sleep 3
-  - docker exec "$(cat ${container_id})" env VAULT_ADDR='http://127.0.0.1:8200' vault status
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
