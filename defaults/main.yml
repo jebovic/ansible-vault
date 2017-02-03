@@ -1,0 +1,16 @@
+---
+
+# Consul installation configuration
+vault_dep_packages:
+  - unzip
+vault_install_dir: /usr/local/bin
+vault_bin_path: "{{ vault_install_dir }}/vault"
+vault_tarball_url: https://releases.hashicorp.com/vault/0.6.4/vault_0.6.4_linux_amd64.zip
+vault_tmp_full_path: /tmp/vault_0.6.4_linux_amd64.zip
+vault_config_dir: /etc/vault/conf.d
+vault_data_dir: /var/vault
+
+# Vault configuration
+vault_http_port: 8200
+vault_backends: []
+vault_listeners: []

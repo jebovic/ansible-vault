@@ -1,0 +1,17 @@
+{% for backend_config in vault_backends|sort %}
+backend "{{backend_config}}" {
+{% for key in vault_backends[backend_config]|sort %}
+  {{ key }} = {{ vault_backends[backend_config][key] }}
+{% endfor %}
+}
+
+{% endfor %}
+
+{% for listener_config in vault_listeners|sort %}
+listener "{{listener_config}}" {
+{% for key in vault_listeners[listener_config]|sort %}
+  {{ key }} = {{ vault_listeners[listener_config][key] }}
+{% endfor %}
+}
+
+{% endfor %}

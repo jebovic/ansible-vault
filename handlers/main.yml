@@ -1,0 +1,6 @@
+---
+
+- name: restart vault
+  supervisorctl:
+    name: vault
+    state: restarted

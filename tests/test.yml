@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - role_under_test
+    - supervisor
+  vars:
+    vault_backends:
+      file:
+        address: '"127.0.0.1:{{ consul_http_port }}"'
+        path: '"vault"'
+    vault_listeners:
+      tcp:
+        address: '"127.0.0.1:{{ vault_http_port }}"'
+        tls_disable: 1
+    supervisor_pip_packages: []
+    supervisor_programs:
+      vault:
+        command: "{{ vault_bin_path }} server -config={{ vault_config_dir }}/config.hcl"
+        autostart: "true"
+        autorestart: "true"
+        stderr_logfile: "{{ supervisor_log_path }}/vault-stderr.log"
+        stderr_logfile_maxbytes: 1MB
+        stderr_logfile_backups: 10
+        stdout_logfile: "{{ supervisor_log_path }}/vault-stdout.log"
+        stdout_logfile_maxbytes: 1MB
+        stdout_logfile_backups: 10

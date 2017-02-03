@@ -1,0 +1,50 @@
+env:
+  - distro: debianjessie
+    init: "/sbin/init"
+    run_opts: ""
+    playbook: test.yml
+  - distro: ubuntutrusty
+    init: "/sbin/init"
+    run_opts: ""
+    playbook: test.yml
+  - distro: ubuntuxenial
+    init: "/sbin/init"
+    run_opts: ""
+    playbook: test.yml
+
+services:
+  - docker
+
+before_install:
+  - docker pull jebovic/${distro}-ansible:latest
+
+script:
+  # run container
+  - container_id=$(mktemp)
+  - docker run --detach --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro -p 8500:8500 --volume="${PWD}":/etc/ansible/roles/role_under_test:ro ${run_opts} jebovic/${distro}-ansible:latest "${init}" > "${container_id}"
+  # Install dependencies.
+  - docker exec "$(cat ${container_id})" ansible-galaxy install -r /etc/ansible/roles/role_under_test/tests/requirements.yml
+  # syntax checking
+  - docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/${playbook} --syntax-check
+  # test role
+  - docker exec "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/${playbook}
+  # test role idempotence
+  - idempotence=$(mktemp)
+  - docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/role_under_test/tests/${playbook} | tee -a ${idempotence}
+  - >
+    tail ${idempotence}
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)
+  # test role tasks
+  - sleep 30
+  - docker exec "$(cat ${container_id})" env TERM=xterm export VAULT_ADDR='http://127.0.0.1:8200'
+  - docker exec "$(cat ${container_id})" env TERM=xterm vault status
+  - docker exec "$(cat ${container_id})" env TERM=xterm vault write secret/foo value=2 enabled=yes
+  - sleep 3
+  - docker exec "$(cat ${container_id})" env TERM=xterm vault read secret/foo
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+  slack:
+    secure: VNsgQTZmqpxpbxw/p2NZzLyV630LAXJIA+KGXLNxJi8I7xpPYWBnaakSfdFYpKO/KFTxU/MGMfb7vSoheDuy7ZDQDX+YZTabb7G8epoKogWqpb7x2kDgswoIKixmKJPF2V1nt4PB29v+lhxgEmZjGoAQo0JFlaT0VRsl4tMOsqL3IMMSTtcXPKxmRZVJM1CwRJp5rzIwg9rdxmzxzTXvXfwZ+G5t5XkY7RHtNaTDMeLVHtWJIfPB+on7ZqU9cYDIlc5GXVjukkrZgWFzuvXZfdn9cdE2YiVBVeeqe/Fa9GWj0UbuuUTQcYlmlZd3e4zRacxS4e3TpQxQwXGkw8hw5MBbq9d2VVGMPakUaq/uY0UeRTQGYhOmh4hCiCRwePMyWDX3Vrip/pIQw0z1sJEuavaHBbR0wPhoOa3tog8/Rx/dbaN5HFTiclDUq/VHI2i0GQ+Wyh42S//SxIdxcXcNKR8MIsWTFCaOeWiBIDrSz1HfE4FCHekhVkKV5P22sX8hV2Te2Dzo7wQtOWTR498xG2KxspzcIL8vQQa90KCOzl/VY8YA77x4WrzUl5Ma8+WjzF58tqFSSVlncOn1m1u2X877iM9H8HBxmHaDoMkf4uiiikx+Ll1Wcz3maFRvQdCjQKVGNzem8Xi39dLmQVzRb8OF+XV3qD2wAQNLXh61GtU=
