@@ -38,7 +38,7 @@ script:
     || (echo 'Idempotence test: fail' && exit 1)
   # test role tasks
   - sleep 30
-  - docker exec "$(cat ${container_id})" env TERM=xterm export VAULT_ADDR='http://127.0.0.1:8200'
+  - docker exec "$(cat ${container_id})" export VAULT_ADDR='http://127.0.0.1:8200'
   - docker exec "$(cat ${container_id})" env TERM=xterm vault status
   - docker exec "$(cat ${container_id})" env TERM=xterm vault init
   - docker exec "$(cat ${container_id})" env TERM=xterm vault write secret/foo value=2 enabled=yes
