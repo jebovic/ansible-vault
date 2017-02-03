@@ -38,12 +38,11 @@ script:
     || (echo 'Idempotence test: fail' && exit 1)
   # test role tasks
   - sleep 30
-  - docker exec "$(cat ${container_id})" export VAULT_ADDR='http://127.0.0.1:8200'
-  - docker exec "$(cat ${container_id})" env TERM=xterm vault status
-  - docker exec "$(cat ${container_id})" env TERM=xterm vault init
-  - docker exec "$(cat ${container_id})" env TERM=xterm vault write secret/foo value=2 enabled=yes
+  - docker exec "$(cat ${container_id})" env VAULT_ADDR='http://127.0.0.1:8200' vault status
+  - docker exec "$(cat ${container_id})" env VAULT_ADDR='http://127.0.0.1:8200' vault init
+  - docker exec "$(cat ${container_id})" env VAULT_ADDR='http://127.0.0.1:8200' vault write secret/foo value=2 enabled=yes
   - sleep 3
-  - docker exec "$(cat ${container_id})" env TERM=xterm vault read secret/foo
+  - docker exec "$(cat ${container_id})" env VAULT_ADDR='http://127.0.0.1:8200' vault read secret/foo
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
