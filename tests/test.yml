@@ -6,8 +6,8 @@
     - supervisor
   vars:
     vault_backends:
-      generic:
-        path: '"secret"'
+      file:
+        path: '"/tmp/vault"'
     vault_listeners:
       tcp:
         address: '"127.0.0.1:{{ vault_http_port }}"'
