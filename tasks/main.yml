@@ -35,12 +35,12 @@
     group: root
     mode: 0755
     remote_src: yes
-  notify: restart vault
+#  notify: restart vault
   when: vault_download|changed
 
 - name: config
   template:
     src: config.hcl.j2
     dest: "{{ vault_config_dir }}/config.hcl"
-  notify: restart vault
+#  notify: restart vault
   tags: vault_config
